@@ -1,0 +1,88 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = Java
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Full
+Input = String
+Parser = SLR
+#RegularDefinitions
+
+#Tokens
+ID: [a-zA-Z][a-zA-Z0-9_]* 
+
+KEY_INT = ID: "int"
+KEY_FLOAT = ID: "float"
+KEY_IF= ID: "if"
+KEY_ELSIF= ID: "elsif"
+KEY_ELSE= ID: "else"
+KEY_ENTAO = ID: "entao"
+KEY_SE = ID: "se"
+KEY_SENAO = ID: "senao"
+KEY_BOOL = ID: "bool"
+KEY_CHAR = ID: "char"
+KEY_STRING = ID: "string"
+KEY_WHILE = ID: "while"
+KEY_DO = ID: "do"
+KEY_LONG = ID: "long"
+KEY_DOUBLE = ID: "double"
+KEY_FOR = ID: "for"
+
+//Delimitadores
+DELIM_PONTOVIRGULA:";"
+DELIM_VIRGULA: ","
+DELIM_PONTO: "."
+DELIM_COLCHETESE: "["
+DELIM_COLCHETESD: "]"
+DELIM_PARENTESESD: ")"
+DELIM_PARENTESESE: "("
+DELIM_CHAVEE: "{"
+DELIM_CHAVED: "}"
+
+//Operadores Aritmeticos
+OPA_SUM: "+"
+OPA_SUB: "-"
+OPA_MUL: "*"
+OPA_DIV: "/"
+
+//Operadores Relacionais
+OPR_MAIOR: ">"
+OPR_MENOR: "<"
+OPR_MAIOR_IGUAL: ">="
+OPR_MENOR_IGUAL: "<="
+OPR_IGUAL: "=="
+OPR_DIFERENTE: "!="
+OPR_ATRIB: "="
+
+//Operadores Lógicos
+OPL_AND: "&&"
+OPL_OR: "||"
+OPL_DIFF: "!"
+
+//Operadores Bit a bit
+OPBB_DE: "<<"
+OPBB_DD: ">>"
+OPBB_AND: "&"
+OPBB_OR: "|"
+OPBB_NOT: "~"
+OPBB_XOR: "^"
+
+IGNORADOS: [\s\n\t\r]+
+
+//Literais
+LIT_INTEIRO:[0-9]+
+LIT_DECIMAIS:[0-9]+\.[0-9]+
+STRING:\"[^\"]*\"
+HEXADECIMAL: 0[xX][0-9a-fA-F]+
+BINARIO: 0[bB][01]+ 
+CHAR: ['][^'][']
+
+//Comentarios  
+COMENT_LINHA: [/][/][^\n]* 
+COMENT_BLOCO: "/*"([^"*"]|["*"][^"/"])*"*/"
+#NonTerminals
+
+#Grammar
