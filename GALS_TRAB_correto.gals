@@ -1,0 +1,344 @@
+#Options
+GenerateScanner = true
+GenerateParser = true
+Language = C++
+ScannerName = Lexico
+ParserName = Sintatico
+SemanticName = Semantico
+ScannerCaseSensitive = true
+ScannerTable = Full
+Input = String
+Parser = SLR
+#RegularDefinitions
+
+#Tokens
+: [\s\n\t\r]+
+
+KEY_INT: "int"
+KEY_FLOAT: "float"
+KEY_IF: "if"
+KEY_ELSIF: "elsif"
+KEY_ELSE: "else"
+KEY_ENTAO: "entao"
+KEY_SED: "se"
+KEY_SENAO: "senao"
+KEY_BOOL: "bool"
+KEY_CHAR: "char"
+KEY_STRING: "string"
+KEY_WHILE: "while"
+KEY_DO: "do"
+KEY_LONG: "long"
+KEY_DOUBLE: "double"
+KEY_FOR: "for"
+KEY_BREAK: "break"
+KEY_CASED: "case"
+KEY_RETURN: "return"
+KEY_CONST: "const"
+KEY_STATIC: "static"
+KEY_STRUCT: "struct"
+KEY_TYPEDEF: "typedef"
+KEY_SWITCH: "switch"
+KEY_CONTINUE: "continue"
+KEY_ENUM: "enum"
+KEY_VOID: "void"
+KEY_SIGNED: "signed"
+KEY_UNSIGNED: "unsigned"
+KEY_AUTO: "auto"
+KEY_REGISTER: "register"
+KEY_GOTO: "goto"
+KEY_SIZEOF: "sizeof"
+KEY_CLASS: "class"
+KEY_NAMESPACE: "namespace"
+KEY_TEMPLATE: "template"
+KEY_TYPENAME: "typename"
+KEY_PUBLIC: "public"
+KEY_PRIVATE: "private"
+KEY_PROTECTED: "protected"
+KEY_NEW: "new"
+KEY_DELETE: "delete"
+KEY_THIS: "this"
+KEY_TRY: "try"
+KEY_CATCH: "catch"
+KEY_FINAL: "final"
+KEY_USING: "using"
+KEY_NULLPTR: "nullptr"
+KEY_CIN: "cin"
+KEY_COUT: "cout"
+DELIM_AMPERSAND: &    
+KEY_VOID: void 
+
+//Delimitadores
+DELIM_PONTOVIRGULA:";"
+DELIM_VIRGULA: ","
+DELIM_PONTO: "."
+DELIM_COLCHETESE: "["
+DELIM_COLCHETESD: "]"
+DELIM_PARENTESESD: ")"
+DELIM_PARENTESESE: "("
+DELIM_CHAVEE: "{"
+DELIM_CHAVED: "}"
+
+//Operadores Aritmeticos
+OPA_SUM: "+"
+OPA_SUM1: "++"
+OPA_SUB: "-"
+OPA_SUB1: "--"
+OPA_MUL: "*"
+OPA_DIV: "/"
+
+//Operadores Relacionais
+OPR_MAIOR: ">"
+OPR_MENOR: "<"
+OPR_MAIOR_IGUAL: ">="
+OPR_MENOR_IGUAL: "<="
+OPR_IGUAL: "=="
+OPR_DIFERENTE: "!="
+OPR_ATRIB: "="
+
+//Operadores Lógicos
+OPL_AND: "&&"
+OPL_OR: "||"
+OPL_DIFF: "!"
+
+//Operadores Bit a bit
+OPBB_DE: "<<"
+OPBB_DD: ">>"
+OPBB_AND: "&"
+OPBB_OR: "|"
+OPBB_NOT: "~"
+OPBB_XOR: "^"
+
+//Literais
+LIT_INTEIRO:[0-9]+
+LIT_DECIMAIS:[0-9]+\.[0-9]+
+STRING:\"[^\"]*\"
+HEXADECIMAL: 0[xX][0-9a-fA-F]+
+BINARIO: 0[bB][01]+ 
+CHAR: ['][^'][']
+
+ID: [a-zA-Z][a-zA-Z0-9_]* 
+
+//Comentarios  
+COMENT_LINHA: [/][/][^\n]* 
+COMENT_BLOCO: "/*"([^"*"]|["*"][^"/"])*"*/"
+#NonTerminals
+<programa>
+<lista_top>
+<top>
+<stmt_sem_decl>
+<lista_decl_func>
+<decl_ou_func>
+<tail_decl_ou_func>
+<decl_func>
+<tipo_retorno>
+<lista_param>
+<param>
+<chamada_func>
+<lista_arg>
+<arg>
+<decl>
+<tipo>
+<lista_ids>
+<id_ou_vetor>
+<bloco>
+<lista_instr>
+<instr>
+<atribuicao>
+<destino_atr>
+<condicional>
+<repeticao>
+<for_init>
+<for_cond>
+<for_pos>
+<decl_for_init>
+<lista_ids_init>
+<id_ou_vetor_init>
+<entrada_saida>
+<expressao>
+<expr_atr>
+<expr_logica>
+<incdec>
+<expr_rel>
+<expr_arit>
+<expr_term>
+<expr_unaria>
+<expr_fator>
+<acesso_vetor>
+<entrada_dados>
+<saida_dados>
+<lista_leituras>
+<lista_saidas>
+#Grammar
+<programa> ::= <lista_top> ;
+
+<lista_top> ::= <top>
+              | <top> <lista_top> ;
+              
+<top> ::= <decl_ou_func>
+       | <stmt_sem_decl> ;
+       
+<stmt_sem_decl> ::= <condicional>
+                  | <repeticao>
+                  | <entrada_saida>
+                  | <bloco>
+                  | <expressao> DELIM_PONTOVIRGULA
+                  | <chamada_func> DELIM_PONTOVIRGULA ;
+
+<lista_decl_func> ::= <decl_func>
+                    | <decl_func> <lista_decl_func> ;
+                    
+<decl_ou_func> ::= <tipo> ID <tail_decl_ou_func> ;
+
+<tail_decl_ou_func> ::=
+      DELIM_PARENTESESE <lista_param> DELIM_PARENTESESD <bloco>       // função com params
+    | DELIM_PARENTESESE DELIM_PARENTESESD <bloco>                      // função sem params
+    | DELIM_PONTOVIRGULA                                               // int a ;
+    | DELIM_VIRGULA <lista_ids> DELIM_PONTOVIRGULA                     // int a, b[3], c ;
+    | DELIM_COLCHETESE LIT_INTEIRO DELIM_COLCHETESD DELIM_PONTOVIRGULA // int a[5] ;
+    | DELIM_COLCHETESE LIT_INTEIRO DELIM_COLCHETESD DELIM_VIRGULA <lista_ids> DELIM_PONTOVIRGULA ;
+                                                                      // int a[5], b, c[2] ;
+
+<decl_func> ::= <tipo_retorno> ID DELIM_PARENTESESE <lista_param> DELIM_PARENTESESD <bloco>
+              | <tipo_retorno> ID DELIM_PARENTESESE DELIM_PARENTESESD <bloco> ;
+
+<tipo_retorno> ::= <tipo>
+                 | KEY_VOID ;
+
+<lista_param> ::= <param>
+                | <param> DELIM_VIRGULA <lista_param> ;
+
+<param> ::= <tipo> ID
+          | <tipo> ID DELIM_COLCHETESE DELIM_COLCHETESD ;
+
+<chamada_func> ::= ID DELIM_PARENTESESE <lista_arg> DELIM_PARENTESESD
+                 | ID DELIM_PARENTESESE DELIM_PARENTESESD ;
+
+<lista_arg> ::= <arg>
+              | <arg> DELIM_VIRGULA <lista_arg> ;
+
+<arg> ::= <expressao>
+        | ID DELIM_COLCHETESE <expressao> DELIM_COLCHETESD ;
+
+<decl> ::= <tipo> <lista_ids> DELIM_PONTOVIRGULA
+         | <tipo> <lista_ids> DELIM_PONTOVIRGULA <decl> ;
+
+<tipo> ::= KEY_INT 
+         | KEY_FLOAT 
+         | KEY_CHAR 
+         | KEY_STRING 
+         | KEY_BOOL 
+         | KEY_DOUBLE 
+         | KEY_LONG ;
+
+<lista_ids> ::= <id_ou_vetor>
+              | <id_ou_vetor> DELIM_VIRGULA <lista_ids> ;
+
+<id_ou_vetor> ::= ID
+                | ID DELIM_COLCHETESE LIT_INTEIRO DELIM_COLCHETESD ;
+
+<bloco> ::= DELIM_CHAVEE <lista_instr> DELIM_CHAVED ;
+
+<lista_instr> ::= <instr>
+                | <instr> <lista_instr> ;
+
+<instr> ::= <decl>
+          | <condicional>
+          | <repeticao>
+          | <entrada_saida>
+          | <bloco>
+          | <expressao> DELIM_PONTOVIRGULA
+          | <chamada_func> DELIM_PONTOVIRGULA ;
+
+<atribuicao> ::= <destino_atr> OPR_ATRIB <expressao> DELIM_PONTOVIRGULA ;
+
+<destino_atr> ::= ID
+                | ID DELIM_COLCHETESE <expressao> DELIM_COLCHETESD ;
+
+<condicional> ::= KEY_IF DELIM_PARENTESESE <expressao> DELIM_PARENTESESD <bloco> 
+                | KEY_IF DELIM_PARENTESESE <expressao> DELIM_PARENTESESD <bloco> KEY_ELSE <bloco> ;
+
+<repeticao> ::= KEY_WHILE DELIM_PARENTESESE <expressao> DELIM_PARENTESESD <bloco>
+              | KEY_FOR DELIM_PARENTESESE <for_init> DELIM_PONTOVIRGULA <for_cond> DELIM_PONTOVIRGULA <for_pos> DELIM_PARENTESESD <bloco>
+              | KEY_DO <bloco> KEY_WHILE DELIM_PARENTESESE <expressao> DELIM_PARENTESESD DELIM_PONTOVIRGULA ;
+              
+<for_init> ::= <decl_for_init>
+             | <expr_atr> ;
+
+<for_cond> ::= <expressao> ;
+
+<for_pos>  ::= <expr_atr>
+             | <incdec> ;
+
+<decl_for_init> ::= <tipo> <lista_ids_init> ;
+
+<lista_ids_init> ::= <id_ou_vetor_init>
+                   | <id_ou_vetor_init> DELIM_VIRGULA <lista_ids_init> ;
+
+<id_ou_vetor_init> ::= ID
+                     | ID OPR_ATRIB <expr_atr>
+                     | ID DELIM_COLCHETESE LIT_INTEIRO DELIM_COLCHETESD ;
+
+<entrada_saida> ::= KEY_RETURN <expressao> DELIM_PONTOVIRGULA
+                  | KEY_CIN <lista_leituras> DELIM_PONTOVIRGULA
+                  | KEY_COUT <lista_saidas> DELIM_PONTOVIRGULA ; 
+
+<expressao> ::= <expr_atr> ;
+
+<expr_atr> ::= <expr_logica>
+             | <destino_atr> OPR_ATRIB <expr_atr> ;
+
+<destino_atr> ::= ID
+                | ID DELIM_COLCHETESE <expressao> DELIM_COLCHETESD ;
+
+<expr_logica> ::= <expr_rel> 
+                | <expr_logica> OPL_OR <expr_rel> 
+                | <expr_logica> OPL_AND <expr_rel> ;
+
+<incdec> ::= ID OPA_SUM1
+           | ID OPA_SUB1
+           | OPA_SUM1 ID
+           | OPA_SUB1 ID ;
+
+<expr_rel> ::= <expr_arit> 
+             | <expr_rel> OPR_IGUAL <expr_arit> 
+             | <expr_rel> OPR_DIFERENTE <expr_arit> 
+             | <expr_rel> OPR_MAIOR <expr_arit> 
+             | <expr_rel> OPR_MENOR <expr_arit> 
+             | <expr_rel> OPR_MAIOR_IGUAL <expr_arit> 
+             | <expr_rel> OPR_MENOR_IGUAL <expr_arit> ;
+
+<expr_arit> ::= <expr_term> 
+              | <expr_arit> OPA_SUM <expr_term> 
+              | <expr_arit> OPA_SUB <expr_term>
+              | <expr_arit> OPA_SUM1
+              | <expr_arit> OPA_SUB1;
+
+<expr_term> ::= <expr_unaria> 
+              | <expr_term> OPA_MUL <expr_unaria> 
+              | <expr_term> OPA_DIV <expr_unaria> ;
+
+<expr_unaria> ::= <expr_fator> 
+                | OPL_DIFF <expr_fator> ;
+
+<expr_fator> ::= ID
+               | <acesso_vetor>
+               | <chamada_func>
+               | LIT_INTEIRO
+               | LIT_DECIMAIS
+               | STRING
+               | CHAR
+               | HEXADECIMAL
+               | BINARIO
+               | DELIM_PARENTESESE <expressao> DELIM_PARENTESESD ;
+
+<acesso_vetor> ::= ID DELIM_COLCHETESE <expressao> DELIM_COLCHETESD ;
+
+<entrada_dados> ::= KEY_CIN <lista_leituras> DELIM_PONTOVIRGULA ;
+
+<saida_dados>   ::= KEY_COUT <lista_saidas> DELIM_PONTOVIRGULA ;
+
+<lista_leituras> ::= OPBB_DD <id_ou_vetor>
+                   | OPBB_DD <id_ou_vetor> <lista_leituras> ;
+
+<lista_saidas> ::= OPBB_DE <expressao>
+                 | OPBB_DE <expressao> <lista_saidas> ;
