@@ -40,7 +40,7 @@ public:
 
     // ========= .text – API de emissão =========
     void clearText();                               // limpa buffer de texto
-    void emitInstr(const std::string& instr);       // emite linha crua (NÃO usar nome 'emit' por causa do Qt)
+    void emitInstr(const std::string& instr);       // emite linha crua
     void emitLabel(const std::string& label);       // rótulo "L1:"
     std::string newLabel(const std::string& prefix ="L"); // gera Lx único
 
@@ -48,19 +48,43 @@ public:
     void emitLoadId(const std::string& nome);       // LDI nome ; LD 0
     void emitStoreId(const std::string& nome);      // LDI nome ; STO 0
 
-    // Aritmética (topo da pilha):
+    // Acesso a vetores (deslocamento constante k):
+    void emitLoadIdOffset(const std::string& nome, int k);   // LDI nome ; LD k
+    void emitStoreIdOffset(const std::string& nome, int k);  // LDI nome ; STO k
+
+    // Aritmética (topo da pilha / acumulador da BIP):
     void emitAdd();                                 // ADD
     void emitSub();                                 // SUB
     void emitMul();                                 // MUL
     void emitDiv();                                 // DIV
 
+    // Bit a bit:
+    void emitAnd();                                 // AND
+    void emitOr();                                  // OR
+    void emitXor();                                 // XOR
+    void emitNot();                                 // NOT
+    void emitShl();                                 // SHL
+    void emitShr();                                 // SHR
+
     // Desvios:
     void emitJmp(const std::string& label);         // JMP label
-    void emitJz(const std::string& label);          // JZ label (zero → salta)
+    void emitJz(const std::string& label);          // JZ label
+
+    // ========= Atribuições =========
+    void emitAssign(const std::string& dest, bool destIsArray, int destIndex,
+                    const std::string& src,  bool srcIsArray,  int srcIndex);
+
+    void emitAssignVarIndex(const std::string& dest, const std::string& idx,
+                            const std::string& src);
+
+    void emitAssignSimpleExpr(const std::string& dest,
+                              const std::string& op1,
+                              const std::string& oper,
+                              const std::string& op2);
 
     // ========= Programa completo =========
-    std::string buildTextSection() const;           // apenas a .text (com entry + HLT)
-    std::string buildProgram(const std::vector<Simbolo>& tabela) const; // .data + .text
+    std::string buildTextSection() const;
+    std::string buildProgram(const std::vector<Simbolo>& tabela) const;
 
     // ========= utilitários =========
     bool emitDataToFile(const std::string& outPath,
@@ -69,7 +93,7 @@ public:
 
 private:
     Options opt_;
-    std::vector<std::string> text_;   // buffer de linhas da .text
+    std::vector<std::string> text_;
     mutable int labelCounter_ = 0;
 
     static bool        isGlobalDataCandidate(const Simbolo& s);

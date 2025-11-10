@@ -47,7 +47,6 @@ std::string CodeGeneratorBIP::buildDataSection(const std::vector<Simbolo>& tabel
         const auto& s = *ps;
         std::string label = sanitizeLabel(s.nome);
 
-        // evita duplicata simples
         int k = 1;
         while (used.count(label)) label = sanitizeLabel(s.nome) + "_" + std::to_string(k++);
         used.insert(label);
@@ -102,7 +101,7 @@ std::string CodeGeneratorBIP::newLabel(const std::string& prefix) {
     return oss.str();
 }
 
-// globais: LDI nome ; LD/STO 0
+// globais: LDI nome ; LD/STO k
 void CodeGeneratorBIP::emitLoadId(const std::string& nome) {
     std::string lbl = sanitizeLabel(nome);
     emitInstr("LDI " + lbl);
@@ -114,11 +113,31 @@ void CodeGeneratorBIP::emitStoreId(const std::string& nome) {
     emitInstr("STO 0");
 }
 
+// vetores com deslocamento constante
+void CodeGeneratorBIP::emitLoadIdOffset(const std::string& nome, int k) {
+    std::string lbl = sanitizeLabel(nome);
+    emitInstr("LDI " + lbl);
+    emitInstr("LD " + std::to_string(k));
+}
+void CodeGeneratorBIP::emitStoreIdOffset(const std::string& nome, int k) {
+    std::string lbl = sanitizeLabel(nome);
+    emitInstr("LDI " + lbl);
+    emitInstr("STO " + std::to_string(k));
+}
+
 // aritmética
 void CodeGeneratorBIP::emitAdd() { emitInstr("ADD"); }
 void CodeGeneratorBIP::emitSub() { emitInstr("SUB"); }
 void CodeGeneratorBIP::emitMul() { emitInstr("MUL"); }
 void CodeGeneratorBIP::emitDiv() { emitInstr("DIV"); }
+
+// bit a bit
+void CodeGeneratorBIP::emitAnd() { emitInstr("AND"); }
+void CodeGeneratorBIP::emitOr()  { emitInstr("OR");  }
+void CodeGeneratorBIP::emitXor() { emitInstr("XOR"); }
+void CodeGeneratorBIP::emitNot() { emitInstr("NOT"); }
+void CodeGeneratorBIP::emitShl() { emitInstr("SHL"); }
+void CodeGeneratorBIP::emitShr() { emitInstr("SHR"); }
 
 // desvios
 void CodeGeneratorBIP::emitJmp(const std::string& label) {
@@ -126,6 +145,49 @@ void CodeGeneratorBIP::emitJmp(const std::string& label) {
 }
 void CodeGeneratorBIP::emitJz(const std::string& label) {
     emitInstr("JZ " + sanitizeLabel(label));
+}
+
+// =================== Atribuições ===================
+// Simples: variável/vetor ← variável/vetor
+void CodeGeneratorBIP::emitAssign(const std::string& dest, bool destIsArray, int destIndex,
+                                  const std::string& src,  bool srcIsArray,  int srcIndex) {
+    if (srcIsArray) emitLoadIdOffset(src, srcIndex);
+    else emitLoadId(src);
+
+    if (destIsArray) emitStoreIdOffset(dest, destIndex);
+    else emitStoreId(dest);
+}
+
+// Vetor com índice variável (v[i] = x)
+void CodeGeneratorBIP::emitAssignVarIndex(const std::string& dest, const std::string& idx,
+                                          const std::string& src) {
+    emitLoadId(src);        // valor de src no AC
+    emitInstr("PUSH");      // salva no topo da pilha
+
+    emitLoadId(idx);        // índice i → AC
+    emitInstr("LDI " + sanitizeLabel(dest));
+    emitAdd();              // soma base + índice
+
+    emitInstr("POP");       // recupera valor de src
+    emitInstr("STO 0");     // armazena em v[i]
+}
+
+// Atribuição com operação simples (a = b + c)
+void CodeGeneratorBIP::emitAssignSimpleExpr(const std::string& dest,
+                                            const std::string& op1,
+                                            const std::string& oper,
+                                            const std::string& op2) {
+    emitLoadId(op1);
+    emitInstr("PUSH");
+    emitLoadId(op2);
+    emitInstr("POP");
+
+    if (oper == "+") emitAdd();
+    else if (oper == "-") emitSub();
+    else if (oper == "*") emitMul();
+    else if (oper == "/") emitDiv();
+
+    emitStoreId(dest);
 }
 
 // =================== construção da .text / programa ===================
